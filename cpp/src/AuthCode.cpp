@@ -12,7 +12,7 @@
 
 using std::string;
 
-static string ssbstr(const string &str, int start, int len = -1, int line = 0) {
+static string substr(const string &str, int start, int len = -1) {
     return start >= 0 ? str.substr(start, len == -1 ? string::npos : len) : str.substr(str.length() + start, len == -1 ? string::npos : len);
 }
 
@@ -27,10 +27,6 @@ static string pad(T val, int width = 0, char padchar = ' ') {
 
 #define md5(str)    MD5(str).toStr()
 #define strlen(str) str.size()
-
-#define substr(...) ssbstr(__VA_ARGS__, __LINE__)
-
-typedef int uint;
 
 static string _authcode(string $string, bool $encode, string $key = "", int $expiry = 0) {
     // 动态密匙长度，相同的明文会生成不同密文就是依靠动态密匙
@@ -63,21 +59,21 @@ static string _authcode(string $string, bool $encode, string $key = "", int $exp
     auto $string_length = strlen($sstring);
 
     string $result = "";
-    uint $box[256];
-    for(uint $i = 0; $i <= 255; $i++) {
+    int $box[256];
+    for(int $i = 0; $i <= 255; $i++) {
         $box[$i] = $i;
     }
 
-    uint $rndkey[256];
+    int $rndkey[256];
 
     // 产生密匙簿
-    for(uint $i = 0; $i <= 255; $i++) {
+    for(int $i = 0; $i <= 255; $i++) {
         $rndkey[$i] = $cryptkey[$i % $key_length];
     }
 
     // 用固定的算法，打乱密匙簿，增加随机性，好像很复杂，实际上对并不会增加密文的强度
-    uint $tmp;
-    for(uint $j = 0, $i = 0; $i < 256; $i++) {
+    int $tmp;
+    for(int $j = 0, $i = 0; $i < 256; $i++) {
         $j = ($j + $box[$i] + $rndkey[$i]) % 256;
 
         $tmp = $box[$i];
@@ -95,7 +91,7 @@ static string _authcode(string $string, bool $encode, string $key = "", int $exp
         $box[$a] = $box[$j];
         $box[$j] = $tmp;
         // 从密匙簿得出密匙进行异或，再转成字符
-        $result += (char)($sstring[$i] ^ $box[(int)((int)$box[$a] + (int)$box[$j]) % 256]);
+        $result += (unsigned char)($sstring[$i] ^ $box[(int)((int)$box[$a] + (int)$box[$j]) % 256]);
     }
 
 //    std::cout << "#styring:" << $sstring << "\t" << "result.size: " << $result.size() << std::endl;;
